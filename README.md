@@ -1,5 +1,9 @@
 # ST Reader · SillyTavern 聊天记录阅读器
 
+本仓库是 [ST Reader 上游项目](https://github.com/liangsheng-sys/st-reader) 的 TauriTavern 兼容分支，保留原作者与 AGPL-3.0 许可。修复 TT 按需加载高亮库时，HTML 代码块引发整楼回退成原文的问题。补丁已通过模拟 TT 接口的浏览器回归，TT 实机仍待验收。
+
+在 TT 的扩展安装窗口粘贴 `https://github.com/ambroselbt28-gif/st-reader`，分支留空，安装默认 `main` 分支。已安装同名旧版时，先在扩展管理中卸载旧版，再安装此地址。
+
 在 SillyTavern 里像读小说一样翻阅聊天，留下批注、收藏喜欢的候选回复，再把选段或 HTML 小剧场做成脱敏图片。
 
 **聊天只读，完整源码公开，不收集任何信息。** HTML 阅读和截图默认允许使用聊天内容里的外链素材，具体请求来源与关闭方法见下方[第三方域名披露](#第三方域名披露)。
@@ -26,7 +30,7 @@
 2. 点 **安装扩展 / Install extension**，粘贴下面的仓库地址，分支留空。
 
    ```text
-   https://github.com/liangsheng-sys/st-reader
+   https://github.com/ambroselbt28-gif/st-reader
    ```
 
 3. 按 ST 提示安装，完成后刷新页面。无需下载 ZIP、安装 npm 依赖或运行构建。
