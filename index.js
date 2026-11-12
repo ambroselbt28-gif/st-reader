@@ -12,10 +12,15 @@ if (isDevInstance(window.location)) {
         if (!isReadonlyGuardInstalled(window)) throw new Error('开发实例的 fetch 只读保护已失效。');
         const { testReadonlyGuard } = await import('./src/core/readonlyGuard.test.js');
         const results = await testReadonlyGuard();
+        if (options.hostRuntime ?? runCore) {
+            const { testHostRuntimeBrowser } = await import('./src/core/hostRuntimeBrowser.test.js');
+            results.push(...await testHostRuntimeBrowser());
+        }
         if (runCore) {
+            const { testHostRuntimeLogic } = await import('./src/core/hostRuntime.test.js');
             const { testCoreLogic } = await import('./src/core/core.test.js');
             const { testCoreBrowser } = await import('./src/core/coreBrowser.test.js');
-            results.push(...await testCoreLogic(), ...await testCoreBrowser());
+            results.push(...await testHostRuntimeLogic(), ...await testCoreLogic(), ...await testCoreBrowser());
         }
         if (options.chatCache ?? (runCore || options.cachePerformance)) {
             const { testChatCacheLogic } = await import('./src/core/chatCache.test.js');

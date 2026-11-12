@@ -233,7 +233,7 @@ function sanitizeHtml(html, alreadySanitized, allowExternal) {
     }
     for (const block of template.content.querySelectorAll('pre code')) {
         const language = [...block.classList].map(name => name.replace(/^custom-/, '')).find(name => name.startsWith('language-'))?.slice(9);
-        if (language && hljs.getLanguage(language)) {
+        if (language && hljs?.getLanguage(language)) {
             block.innerHTML = hljs.highlight(block.textContent, { language, ignoreIllegals: true }).value;
             block.classList.add('hljs', `language-${language}`);
         } else block.classList.add('hljs');

@@ -897,3 +897,11 @@ UI（`reader.js`）：顶栏 `.stcr-open-st-btn`（`data-act="open-in-st"`，有
 实测（8100，无头 Chrome，`--enable-precise-memory-info`）：4000 楼 / 50 MiB 样本整本导出 TXT 12.0 秒、53 MB 文件，HTML 11.8 秒、53.4 MB；JS 堆打开聊天后 59–65 MB，导出峰值 176 / 228 MB，结束 GC 后回到 66 MB（聊天还在内存缓存里），清缓存后 29 MB（与导出前相同）。
 
 **T97 验收后补充（2026-11-09，D43 补充）**：`chatSource.js` 新导出 `exportRawChat(chatKey, {signal?})` → `Promise<{filename, blob}>`。请求与 ST 聊天列表的导出按钮（`public/script.js` `.exportRawChatButton`）相同：`POST /api/chats/export`，`{is_group, avatar_url（群聊为 undefined）, file: '<fileName>.jsonl', exportfilename: 同上, format: 'jsonl'}`；ST 在 `format === 'jsonl'` 时只 `readFileSync` 并把原文放在 `result` 返回（`src/endpoints/chats.js`），不写文件。`blob` 为 `application/octet-stream`，内容与磁盘上的聊天文件逐字节相同（8100 两个样本 SHA-256 核对过）；`result` 不是字符串抛 `StcrDataError('INVALID_RESPONSE')`。`READ_ENDPOINTS` 增加 `/api/chats/export` 这一项（只增）；D02 禁用名单、守卫、审计不变。
+
+### 5.23 TT 高亮库兼容（T100，2026-11-12）
+
+`loadHostRuntime()` 保留原签名与并发初始化缓存，在返回前补齐阅读器使用的可选高亮库。ST 的 `SillyTavern.libs.hljs` 存在时直接复用；缺失时导入宿主 `/lib.js`，使用直接导出的 `hljs` 或等待 `getHljs()`。TT v2.4.0 与 main 的 `src/lib.js` 均采用后者。
+
+补齐后的 `libs` 是阅读器副本，保留其他宿主库引用。高亮包加载失败时记录警告并交付原有库。`formatter.js` 仅在高亮库存在时调用语言识别，缺失时仍保留代码文字并继续 HTML 识别、沙箱接线。生产调用依旧等待 `initFormatter()`，随后同步调用 `renderMessage()`。
+
+`testHostRuntimeLogic()` 覆盖同步库、异步库、直接导出、接口缺失与加载失败。`testHostRuntimeBrowser()` 使用合成消息经正式楼层入口，验证 HTML 脚本执行、原文切换、普通代码与思维链保留、裸 HTML。开发实例可运行 `await stcrSelfTest({core:false,hostRuntime:true})`。完整 TT 实机及原开发实例性能回归待验收，详见 T100 交接。
