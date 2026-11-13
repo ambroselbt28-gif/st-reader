@@ -905,3 +905,16 @@ UI（`reader.js`）：顶栏 `.stcr-open-st-btn`（`data-act="open-in-st"`，有
 补齐后的 `libs` 是阅读器副本，保留其他宿主库引用。高亮包加载失败时记录警告并交付原有库。`formatter.js` 仅在高亮库存在时调用语言识别，缺失时仍保留代码文字并继续 HTML 识别、沙箱接线。生产调用依旧等待 `initFormatter()`，随后同步调用 `renderMessage()`。
 
 `testHostRuntimeLogic()` 覆盖同步库、异步库、直接导出、接口缺失与加载失败。`testHostRuntimeBrowser()` 使用合成消息经正式楼层入口，验证 HTML 脚本执行、原文切换、普通代码与思维链保留、裸 HTML。开发实例可运行 `await stcrSelfTest({core:false,hostRuntime:true})`。完整 TT 实机及原开发实例性能回归待验收，详见 T100 交接。
+
+### 5.24 智库图片（T103，2026-11-13）
+
+核对智库公开源码 `ruoege49-ship-it/zhiku-tavern-helper` 的 `f8ecdc5e94a0e58f90fded6ffd0cabc6e8ce61bc`，按保存格式独立实现读取。消息模型的每个 `swipes[]` 新增冻结的 `zhikuImages` 数组，元素为 `{kind, url, caption, page?}`。`toMessageModel()`、`renderMessage()` 与现有句柄签名保持兼容。
+
+- `readZhikuImages(raw, swipe, text)` 从指定候选正文及 `extra` 产生图片副本。插图记录按 `swipe:offset:marker` 读取，精确位置优先，移动后的相同标记按出现顺序回退。删除记录与失去正文引用的记录被过滤。画师库的 `<img class="pc-chat-img">`、兼容类与 `alt="画师库生成"` 直接提取地址。
+- 漫画页使用正文中的 `<image>` 块，正文缺少页描述时读取对应候选的 `zhikuComicSrc`。规范化内文的 Unicode 码点 FNV-1a 对应 `zhikuComic` 的页键，展示所选版本。独立叠字作为安全文字排在图下，经过阅读器脱敏。
+- `zhikuImageUrl(value, {baseUrl, allowExternal})` 校验栅格内嵌图片、同源 Blob、酒馆图片文件路径、本地 `idb:` 地址及宿主允许的 HTTPS 外链。
+- `createZhikuImageResolver(options?)` 返回 `{resolve, destroy}`。`resolve(source, options?)` 返回 `{url, release}` 或 `{error}`。只读打开 `zhiku_images/images`，建库升级请求立即中止。并行读取共享对象地址，引用释放与会话关闭负责回收。
+- `createZhikuImageManager({chat,scroller,enabled,onPresence,resolver?})` 返回 `{attach,setEnabled,destroy}`。正式 `buildFloor` 经 `ctx.attachZhiku` 接入，媒体区位于正文下方、正文锚点之外。预建楼挂载后才被观察，进入视口附近才加载。移除楼层或切候选会释放旧图片，令牌阻止迟到结果重新挂载。
+- 阅读器设置 `showZhikuImages` 默认 `true`，由现有偏好存储与备份保存。页脚按钮和 Aa 开关同步。图片存在时底栏使用 44px 高度，手机按钮完整处于视口内。原生智库标记类在阅读器副本里隔离，生成按钮从副本移除。
+
+`node dev/selftest.mjs` 包含 12 项纯逻辑回归。开发实例可执行 `await stcrSelfTest({core:false,zhikuImages:true})`，额外执行 9 项浏览器回归，使用唯一命名的合成 IndexedDB，通过适配器替换库名。测试完成后删除该合成库。正式 TT 实机和完整原开发实例回归待验收，环境情况见交接信。

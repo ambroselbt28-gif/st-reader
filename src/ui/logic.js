@@ -29,6 +29,7 @@ export const DEFAULT_PREFS = Object.freeze({
     htmlNetwork: true,     // T44b：HTML 默认允许加载外链（人类 2026-09-30 定，修订 D16）；可在 Aa 关掉
     htmlWidth: 390,        // T44b：HTML 渲染宽度，390 / 768 / 1200 / 'fit'；最近一次选的记成默认
     htmlBarHidden: false,  // T80：HTML 块上方的工具条平时藏起来，悬停块时淡入（触屏点块右上角）
+    showZhikuImages: true, // T103：显示智库已经生成并保存在消息中的图片
     followSide: 'right',   // T80：楼层胶囊（跟随条）在正文列的哪一侧，'right' / 'left'
     followOpen: false,     // T80 验收后：楼层胶囊一直展开（上一楼 / 下一楼常驻），不用先悬停
     drawerPinned: false,
@@ -64,7 +65,7 @@ export function normalizePrefs(raw) {
     else if (out.width !== null) out.widthMode = 'custom';
     if (['host', 'paper', 'night'].includes(input.theme)) out.theme = input.theme;
     out.docExport = normalizeDocOptions(input.docExport);
-    for (const key of ['hideUser', 'hideStHidden', 'expandAllReasoning', 'hideReasoning', 'redact', 'autoNames', 'htmlNetwork', 'htmlBarHidden', 'followOpen', 'drawerPinned', 'panelPinned', 'updateNotice', 'openInStConfirm']) {
+    for (const key of ['hideUser', 'hideStHidden', 'expandAllReasoning', 'hideReasoning', 'redact', 'autoNames', 'htmlNetwork', 'htmlBarHidden', 'showZhikuImages', 'followOpen', 'drawerPinned', 'panelPinned', 'updateNotice', 'openInStConfirm']) {
         if (typeof input[key] === 'boolean') out[key] = input[key];
     }
     return out;

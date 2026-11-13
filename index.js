@@ -12,6 +12,11 @@ if (isDevInstance(window.location)) {
         if (!isReadonlyGuardInstalled(window)) throw new Error('开发实例的 fetch 只读保护已失效。');
         const { testReadonlyGuard } = await import('./src/core/readonlyGuard.test.js');
         const results = await testReadonlyGuard();
+        if (options.zhikuImages ?? runCore) {
+            const { testZhikuImagesLogic } = await import('./src/core/zhikuImages.test.js');
+            const { testZhikuImagesBrowser } = await import('./src/core/zhikuImagesBrowser.test.js');
+            results.push(...await testZhikuImagesLogic(), ...await testZhikuImagesBrowser());
+        }
         if (options.hostRuntime ?? runCore) {
             const { testHostRuntimeBrowser } = await import('./src/core/hostRuntimeBrowser.test.js');
             results.push(...await testHostRuntimeBrowser());

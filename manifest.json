@@ -7,7 +7,7 @@
     "js": "index.js",
     "css": "style.css",
     "author": "st-reader team",
-    "version": "0.4.0",
+    "version": "0.4.2",
     "homePage": "https://github.com/ambroselbt28-gif/st-reader",
     "auto_update": true,
     "minimum_client_version": "1.13.0",

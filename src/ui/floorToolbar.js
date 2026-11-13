@@ -106,6 +106,8 @@ function fillRendered(ctx, el, model, swipeIndex) {
     if (htmlBlocks.length) ctx.attachHtml(text, htmlBlocks, { index: model.index, swipe: rendered.swipeIndex, model });
     scopeFloorStyles(text);
     block.append(text);
+    ctx.attachZhiku?.(block, swipe.zhikuImages ?? [], { index: model.index,
+        prepareText: redact ? element => redactElement(element, redact) : null });
     syncBookmarkMarks(ctx, el);
     return rendered;
 }

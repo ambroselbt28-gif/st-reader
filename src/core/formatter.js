@@ -144,7 +144,7 @@ function parseStyleText(text, allowExternal, scope) {
 }
 
 /** 目标角色（不是宿主当前角色）是否允许外部媒体：沿用 ST 的全局开关与逐角色覆盖。 */
-function externalMediaAllowed(names) {
+export function externalMediaAllowed(names) {
     const power = runtime.getContext().powerUserSettings ?? {};
     const id = names?.character?.avatar ?? names?.groupId;
     if (id && power.external_media_allowed_overrides?.includes(id)) return true;

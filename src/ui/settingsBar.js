@@ -46,6 +46,8 @@ export function createSettingsBar({ onExport, onImport, onMirror = () => {}, onR
         h('button', { type: 'button', class: 'stcr-btn stcr-seg-btn', 'data-theme-pick': 'paper', text: '纸张', title: '暖白纸色，去掉聊天框，像读书' }),
         h('button', { type: 'button', class: 'stcr-btn stcr-seg-btn', 'data-theme-pick': 'night', text: '夜读', title: '深色纸面，去掉聊天框，晚上看不刺眼' }));
     const hideUser = switchInput('隐藏用户楼');
+    const zhikuImages = switchInput('显示智库图片');
+    zhikuImages.el.title = '显示智库保存的插图与漫画页，页脚图片按钮也能切换';
     const hideStHidden = switchInput('隐藏 ST 已隐藏的楼');
     hideStHidden.el.title = '在 ST 里点过小眼睛（不发给模型）的楼，用户楼和角色楼都收成一行，点开能看';
     const redact = switchInput('脱敏显示');
@@ -133,7 +135,7 @@ export function createSettingsBar({ onExport, onImport, onMirror = () => {}, onR
             row('行距', lineRange, lineValue),
             row('宽度', widthSeg, widthCustom),
             row('思维链', reasoningSeg),
-            row('显示', hideUser.el, hideStHidden.el, htmlBar.el, sideSeg, followOpen.el),
+            row('显示', hideUser.el, hideStHidden.el, zhikuImages.el, htmlBar.el, sideSeg, followOpen.el),
             redactRow),
         more,
         h('div', { class: 'stcr-set-foot' }, layoutBtn, moreBtn,
@@ -167,6 +169,7 @@ export function createSettingsBar({ onExport, onImport, onMirror = () => {}, onR
         if (theme) setPrefs({ theme });
     });
     hideUser.input.addEventListener('change', () => setPrefs({ hideUser: hideUser.input.checked }));
+    zhikuImages.input.addEventListener('change', () => setPrefs({ showZhikuImages: zhikuImages.input.checked }));
     hideStHidden.input.addEventListener('change', () => setPrefs({ hideStHidden: hideStHidden.input.checked }));
     htmlSeg.addEventListener('click', event => {
         const mode = event.target.closest('[data-html-mode]')?.dataset.htmlMode;
@@ -214,6 +217,7 @@ export function createSettingsBar({ onExport, onImport, onMirror = () => {}, onR
         if (shown.widthMode === 'custom') { widthRange.value = String(shown.width); widthValue.textContent = String(shown.width); }
         else widthRange.value = String(document.querySelector('#stcr_root .stcr-scroll > #stcr_chat')?.getBoundingClientRect().width ?? 800);
         hideUser.input.checked = prefs.hideUser;
+        zhikuImages.input.checked = prefs.showZhikuImages;
         hideStHidden.input.checked = prefs.hideStHidden;
         for (const button of htmlSeg.children) button.classList.toggle('stcr-on', button.dataset.htmlMode === prefs.htmlMode);
         htmlNet.input.checked = prefs.htmlNetwork;

@@ -1,4 +1,5 @@
 // ST Reader — AGPL-3.0
+import { readZhikuImages } from './zhikuImages.js';
 /** 冻结 API 的独立 JSON 快照；不对 getContext() 的对象调用。 */
 export function freezeJson(value) {
     if (value && typeof value === 'object' && !Object.isFrozen(value)) {
@@ -37,6 +38,7 @@ export function toMessageModel(raw, index) {
             reasoning: typeof reasoning === 'string' ? reasoning : '',
             reasoningDuration: typeof duration === 'number' && Number.isFinite(duration) && duration >= 0 ? duration : null,
             sendDate: normalizeDate(info?.send_date ?? raw.send_date),
+            zhikuImages: readZhikuImages(raw, i, current ? raw.mes : String(text ?? '')),
         });
     });
     return Object.freeze({ index, name: String(raw.name ?? ''), isUser: !!raw.is_user, isSystem: !!raw.is_system,

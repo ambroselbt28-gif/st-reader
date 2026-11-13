@@ -1,4 +1,15 @@
 /* ST Reader — AGPL-3.0 */
+/* T103 智库图片只在阅读器自己的媒体区显示。 */
+#stcr_root.stcr-has-zhiku { --stcr-footer: 44px; }
+#stcr_root .stcr-zhiku-toggle { display: inline-flex; align-items: center; justify-content: center; gap: .4em; min-width: 44px; min-height: 40px; flex-shrink: 0; }
+#stcr_root .stcr-zhiku-toggle[hidden], #stcr_root .stcr-zhiku-gallery[hidden] { display: none !important; }
+#stcr_root .stcr-zhiku-gallery { margin-top: 1rem; }
+#stcr_root .stcr-zhiku-picture { margin: 1rem 0; max-width: 100%; }
+#stcr_root .stcr-zhiku-slot { min-height: 100px; display: grid; place-items: center; color: var(--SmartThemeBodyColor); font-size: .85em; }
+#stcr_root .stcr-zhiku-slot img { display: block; max-width: 100%; max-height: 85vh; width: auto; height: auto; border-radius: 8px; }
+#stcr_root .stcr-zhiku-picture figcaption { margin-top: .4em; font-size: .75em; opacity: .7; text-align: center; }
+#stcr_root .stcr-zhiku-caption { white-space: pre-wrap; margin: .5em 0; font-size: .9em; }
+@media (max-width: 600px) { #stcr_root .stcr-zhiku-toggle { min-width: 44px; min-height: 44px; } #stcr_root .stcr-zhiku-toggle span { display: none; } }
 /* ST Reader（阅读器）样式。根 #stcr_root、正文 #stcr_chat，自有类名一律 stcr- 前缀（D12）。
  * 外框只用 ST 主题变量上色（02 §2），楼层本身交给 ST 原生样式 + 用户主题/美化 CSS（D10）。
  * 默认排版 B「原样」；A「书页」只在 #stcr_root.stcr-dir-a 下生效，不影响 ST 主界面。 */

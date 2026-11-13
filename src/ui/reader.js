@@ -5,7 +5,7 @@
 import { exportRawChat, getCurrentChatKey, openChat, parseChatKey } from '../core/chatSource.js';
 import { checkOpenInHost, openInHost } from '../core/hostNavigation.js';
 import { maskHtmlString } from '../core/cardExport.js';
-import { initFormatter } from '../core/formatter.js';
+import { initFormatter, externalMediaAllowed } from '../core/formatter.js';
 import { store } from '../core/store.js';
 import { flushMirror, getMirrorStatus, mirrorNow, onMirrorStatus, restoreFromServer, whenStarted } from '../core/backupService.js';
 import { getVersion } from '../core/updateService.js';
@@ -18,6 +18,7 @@ import { favoriteNote, isFavoriteChat, loadFavoriteChats, onFavoriteChatsChange,
 import { createNoteEditor } from './noteEditor.js';
 import { createDrawer } from './drawer.js';
 import { createHtmlManager } from './htmlBlocks.js';
+import { createZhikuImageManager } from './zhikuImages.js';
 import { createHtmlShot } from './htmlShot.js';
 import { buildFloor, buildSwipeControl, fillFloor, floorFault, floorPlainText, syncBookmarkMarks } from './floorToolbar.js';
 import { effectivePrefs, faultReport, foldRuns, followPlacement, formatStamp, isFolded, mirrorStatusText, parseJumpInput, pickSwipe, progressText, restoreSummary, swipePreviews } from './logic.js';
@@ -97,6 +98,7 @@ export async function openReader({ tab, chatKey } = {}) {
         stateBox: root.querySelector('.stcr-state'), progressBtn: root.querySelector('.stcr-progress'),
         progressLine: root.querySelector('.stcr-progress-line > span'), topPercent: root.querySelector('.stcr-top-percent'),
         titleOwner: root.querySelector('.stcr-title-owner'), titleFile: root.querySelector('.stcr-title-file'),
+        zhikuBtn: root.querySelector('.stcr-zhiku-toggle'),
         panelBtn: root.querySelector('.stcr-panel-btn'), favBtn: root.querySelector('.stcr-chat-fav'), reloadBtn: root.querySelector('.stcr-reload-btn'), openStBtn: root.querySelector('.stcr-open-st-btn'), moreBtn: root.querySelector('.stcr-top-more'), redactBadge: root.querySelector('.stcr-redact-badge'),
         handle: null, chatKey: null, owner: '', token: 0, controller: null,
         firstPage: -1, lastPage: -1, swipeView: new Map(), reasoning: new Map(), hoverIndex: null,
@@ -170,6 +172,13 @@ export async function openReader({ tab, chatKey } = {}) {
             const data = session.redact;
             if (!hasRedaction({ ...data, names: redactNames(session, where.model) })) return html;
             return maskHtmlString(html, { ...htmlMaskBase(session, where.model), maskWords: data.words, rules: data.rules, autoReplaceNames: getPrefs().autoNames, applyReplaceRules: true });
+        },
+    });
+    session.zhiku = createZhikuImageManager({ chat: session.chat, scroller: session.scroller,
+        enabled: getPrefs().showZhikuImages,
+        onPresence: present => {
+            session.zhikuBtn.hidden = !present;
+            session.root.classList.toggle('stcr-has-zhiku', present);
         },
     });
     session.htmlShot = createHtmlShot({
@@ -314,6 +323,7 @@ export function closeReader() {
         session.htmlShot.close();
         session.docPanel.close();
         session.html.destroy(); // 所有 HTML 沙箱一起销毁
+        session.zhiku.destroy();
         S = null;
         session.token++;
         session.controller?.abort();
@@ -541,6 +551,7 @@ function onClick(event) {
         switch (act) {
             case 'exit': closeReader(); return;
             case 'drawer': toggleDrawer(); return;
+            case 'zhiku-images': setPrefs({ showZhikuImages: !getPrefs().showZhikuImages }); return;
             case 'close-drawer': session.drawer.close(); return;
             case 'panel': togglePanel(); return;
             case 'fav-chat': toggleChatFav(actEl); return;
@@ -725,6 +736,11 @@ function applyPrefs(prefs) {
     root.classList.toggle('stcr-hide-reasoning', prefs.hideReasoning);
     root.classList.toggle('stcr-redacted', prefs.redact);
     root.classList.toggle('stcr-html-bar-hidden', prefs.htmlBarHidden);
+    S.zhiku.setEnabled(prefs.showZhikuImages);
+    S.zhikuBtn.setAttribute('aria-pressed', String(prefs.showZhikuImages));
+    S.zhikuBtn.title = prefs.showZhikuImages ? '隐藏智库图片' : '显示智库图片';
+    S.zhikuBtn.setAttribute('aria-label', S.zhikuBtn.title);
+    S.zhikuBtn.classList.toggle('stcr-on', prefs.showZhikuImages);
     root.classList.toggle('stcr-follow-pinned', prefs.followOpen);
     setRedactState(prefs.redact ? sideRedaction(S) : null);
     setTitles(S);
@@ -1452,6 +1468,9 @@ function floorContext() {
         isReasoningOpen: index => session.reasoning.has(index) ? session.reasoning.get(index) : getPrefs().expandAllReasoning,
         isBookmarked: (index, swipe) => session.marks.isBookmarked(index, swipe),
         attachHtml: (text, blocks, where) => session.html.attach(text, blocks, where),
+        attachZhiku: (block, images, options) => session.zhiku.attach(block, images, { ...options,
+            allowExternal: externalMediaAllowed(session.handle.getRegexContext(options.index)),
+        }),
         redactFor: model => {
             const data = getPrefs().redact && session.redact ? { ...session.redact, names: redactNames(session, model) } : null;
             if (!hasRedaction(data)) return null;
